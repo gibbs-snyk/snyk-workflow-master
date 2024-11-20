@@ -44,7 +44,7 @@ jobs:
         run: npm install
 
       # Step 6: Run Snyk Open Source Test
-      # Default behaviour without an input flag: Run a snyk test, use snyk-filter to pass/fail, and use snyk-to-html for a report
+      # Default behaviour without an input flag: Run a snyk test (crit/high only), use snyk-filter to pass/fail, and use snyk-to-html for a report
       # If an input flag is provided when the script is called, it will be inserted here instead of using snyk-filter.
       - name: Snyk Open Source Test
         run: |
@@ -52,7 +52,7 @@ jobs:
             snyk test ${{ inputs.flag }}
           else
           # Run snyk test and save JSON output
-          snyk test --json > snyk-results.json
+          snyk test --all-projects --severity-threshold=high --json > snyk-results.json
           # Use snyk-filter to determine pass/fail
           cat snyk-results.json | snyk-filter
           # Generate HTML report using snyk-to-html
