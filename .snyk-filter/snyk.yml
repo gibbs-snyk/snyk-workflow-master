@@ -1,0 +1,20 @@
+# This filter fails if there are: >3 high, or >1 critical vulnerabilities
+version: 2
+customFilters:
+  filter: |
+    if (([.vulnerabilities[] | select(.severity == "high")] | length > 3) 
+      or 
+      ([.vulnerabilities[] | select(.severity == "critical")] | length > 1)) 
+    then
+      .vulnerabilities |= map(if (.severity == "high" or .severity == "critical") then . else empty end)
+    else
+      .vulnerabilities |= map(empty)
+    end
+  pass: |
+    if (([.vulnerabilities[] | select(.severity == "high")] | length > 3)
+      or
+      ([.vulnerabilities[] | select(.severity == "critical")] | length > 1)) 
+    then 1
+    else 0
+    end
+  msg: "High and critical severity vulnerabilities found. Please review upgrade steps."
