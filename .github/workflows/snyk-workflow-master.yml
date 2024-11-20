@@ -10,7 +10,7 @@ on:
         SNYK_TOKEN:
           required: true
 
-env:
+# env:
   # Set SNYK_API to a regional endpoint if needed to match your Snyk environment
   # SNYK_API: https://app.eu.snyk.io/api
 
@@ -29,9 +29,10 @@ jobs:
 
       # Step 3: Install Snyk CLI and Additional Tools
       - name: Install Snyk CLI
-         npm install snyk -g
-         npm install snyk-filter -g
-         npm install snyk-to-html -g
+        run: |
+          npm install snyk -g
+          npm install snyk-filter -g
+          npm install snyk-to-html -g
 
       # Step 4: Authenticate Snyk
       - name: Authenticate Snyk
