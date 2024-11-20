@@ -1,0 +1,93 @@
+name: Snyk master workflow example (Open Source, Code, Container, IaC)
+
+on: 
+    workflow_call:
+      inputs:
+        flag:
+          required: false
+          type: string
+      secrets:
+        SNYK_TOKEN:
+          required: true
+
+env:
+#   SNYK_API: https://app.eu.snyk.io/api
+
+jobs:
+  Snyk-workflow-master:
+    runs-on: ubuntu-latest
+  
+    steps:
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+
+      # Step 3: Install Snyk CLI and Additional Tools
+      - name: Install Snyk CLI
+        npm install snyk -g
+        npm install snyk-filter -g
+        npm install snyk-to-html -g
+
+      # Step 4: Authenticate Snyk
+      - name: Authenticate Snyk
+        run: |
+          export SNYK_TOKEN=${{ secrets.SNYK_TOKEN }}
+          snyk auth $SNYK_TOKEN --auth-type=token
+    
+      # Step 5: Install Project Dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Step 6: Run Snyk Open Source Test
+      # Default behaviour without an input flag: Run a snyk test and send the results into snyk-filter; failing on >2 high or >0 critical
+      # If an input flag is provided when the script is called, it will be inserted here instead of using snyk-filter.
+      - name: Snyk Open Source Test
+        run: |
+          if [ -n "${{ inputs.flag }}" ]; then
+            snyk test ${{ inputs.flag }}
+          else
+          # Run snyk test and save JSON output
+          snyk test --json > snyk-results.json
+          # Use snyk-filter to determine pass/fail
+          cat snyk-results.json | snyk-filter
+          # Generate HTML report using snyk-to-html
+          snyk-to-html -i snyk-results.json -o snyk-open-source-report.html
+          fi
+        continue-on-error: true
+
+      # Step 7: Run Snyk Code Test
+      - name: Run Snyk Code Test
+        run: snyk code test --json | snyk-to-html-o snyk-code-report.html
+
+        continue-on-error: true
+
+      # Step 8: Build image and test using Snyk Container
+      - name: Build image from dockerfile and run Snyk Container test
+        run: |
+          docker build . -t ${GITHUB_REPOSITORY##*/}:${GITHUB_REF_NAME}
+          snyk container test ${GITHUB_REPOSITORY##*/}:${GITHUB_REF_NAME} --file=Dockerfile
+        continue-on-error: true
+
+      # Step 9: Run Snyk IaC test
+      - name: Run Snyk IaC test
+        run: snyk iac test
+        continue-on-error: true
+
+      # Step 10: Upload generated HTML reports
+      - name: Upload Snyk Open Source Report
+        if: always() # Ensure this runs even if the previous step fails
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-open-source-report
+          path: snyk-open-source-report.html
+
+      - name: Upload Snyk Code Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-code-report
+          path: snyk-code-report.html
