@@ -45,32 +45,27 @@ jobs:
         run: npm install
 
       # Step 6: Run Snyk Open Source Test
-      # Default behaviour without an input flag: Run a snyk test (crit/high only), use snyk-filter to pass/fail, and use snyk-to-html for a report
-      # If an input flag is provided when the script is called, it will be inserted here instead of using snyk-filter.
+      # Run a snyk test (crit/high only), use snyk-filter to pass/fail, and use snyk-to-html for a report
       - name: Snyk Open Source Test
         run: |
-          if [ -n "${{ inputs.flag }}" ]; then
-            snyk test ${{ inputs.flag }}
-          else
-          # Run snyk test and save JSON output
+         # Run snyk test and save JSON output
           snyk test --all-projects --severity-threshold=high --json > snyk-results.json
           # Use snyk-filter to determine pass/fail
           cat snyk-results.json | snyk-filter
           # Generate HTML report using snyk-to-html
           snyk-to-html -i snyk-results.json -o snyk-open-source-report.html
-          fi
         continue-on-error: true
 
       # Step 7: Run Snyk Code Test and generate a report
       - name: Run Snyk Code Test
-        run: snyk code test --json | snyk-to-html-o snyk-code-report.html
+        run: snyk code test --json | snyk-to-html -o snyk-code-report.html
         continue-on-error: true
 
       # Step 8: Build image and test using Snyk Container
       - name: Build image from dockerfile and run Snyk Container test
         run: |
           docker build . -t ${GITHUB_REPOSITORY##*/}:${GITHUB_REF_NAME}
-          snyk container test ${GITHUB_REPOSITORY##*/}:${GITHUB_REF_NAME} --file=Dockerfile
+          snyk container test ${GITHUB_REPOSITORY##*/}:${GITHUB_REF_NAME} --file=Dockerfile --exclude-app-vulns
         continue-on-error: true
 
       # Step 9: Run Snyk IaC test
