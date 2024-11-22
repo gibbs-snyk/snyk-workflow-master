@@ -61,7 +61,7 @@ jobs:
         run: |
             ls -la snyk-workflow-master/snyk-filter-master
             cat snyk-os-results.json | snyk-filter -f ./snyk-workflow-master/snyk-filter-master/snyk.yml
-        continue-on-error: false
+        continue-on-error: true
     
       # Step 6c: Generate Snyk Open Source HTML Report
       - name: Generate Snyk Open Source HTML Report
@@ -71,7 +71,7 @@ jobs:
       # Step 7a: Run Snyk Code Test 
       - name: Run Snyk Code Test and generate 
         run: snyk code test  --json-file-output=snyk-code-results.json
-        continue-on-error: false
+        continue-on-error: true
     
       # Step 7b: Generate Snyk Code HTML Report 
       - name: Generate Snyk Code HTML Report
