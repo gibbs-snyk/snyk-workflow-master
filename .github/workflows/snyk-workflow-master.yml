@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: gibbs-snyk/snyk-workflow-master
-          path: 'snyk-filter-master'
+          path: 'snyk-workflow-master'
       
       # Step 2: Set up Node.js
       - name: Set up Node.js
@@ -59,8 +59,8 @@ jobs:
       # Step 6b: Run Snyk-Filter on Open Source test results
       - name: Run snyk-filter
         run: |
-            ls -la snyk-filter-master
-            cat snyk-os-results.json | snyk-filter -f ./snyk-filter-master/.snyk
+            ls -la snyk-workflow-master/snyk-filter-master
+            cat snyk-os-results.json | snyk-filter -f ./snyk-workflow-master/snyk-filter-master/.snyk
         continue-on-error: false
     
       # Step 6c: Generate Snyk Open Source HTML Report
