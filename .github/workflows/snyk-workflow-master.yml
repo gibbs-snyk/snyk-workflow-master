@@ -19,9 +19,16 @@ jobs:
     runs-on: ubuntu-latest
   
     steps:
-      # Step 1: Checkout Code
+      # Step 1a: Checkout Code
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Checkout .snyk file from private repo
+        uses: actions/checkout@v4
+        with:
+          repository: gibbs-snyk/snyk-workflow-master
+          path: 'snyk-filter-master'
+          token: ${{ secrets.SNYK_REPO_TOKEN }}
       
       # Step 2: Set up Node.js
       - name: Set up Node.js
@@ -51,7 +58,7 @@ jobs:
         
       # Step 6b: Run Snyk-Filter on Open Source test results
       - name: Run snyk-filter
-        run: cat snyk-os-results.json | snyk-filter
+        run: cat snyk-os-results.json | snyk-filter -f ./snyk-filter-master/.snyk
         continue-on-error: true
     
       # Step 6c: Generate Snyk Open Source HTML Report
