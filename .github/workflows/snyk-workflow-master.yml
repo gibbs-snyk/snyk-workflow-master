@@ -44,17 +44,23 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # Step 6: Run Snyk Open Source Test
-      # Run a snyk test (crit/high only), use snyk-filter to pass/fail, and use snyk-to-html for a report
       - name: Snyk Open Source Test
         run: |
-         # Run snyk test and save JSON output
+          # Run snyk test and save JSON output
           snyk test --all-projects --severity-threshold=high --json > snyk-results.json
-          # Use snyk-filter to determine pass/fail
+         
+          # Use snyk-filter to determine pass/fail and log the result
+          echo "=== Open Source test: snyk-filter output ==="
           cat snyk-results.json | snyk-filter
+        
           # Generate HTML report using snyk-to-html
+          echo "=== snyk-to-html Report ==="
           snyk-to-html -i snyk-results.json -o snyk-open-source-report.html
+        
+          # Optionally output the location of the generated HTML file
+          echo "Snyk HTML report generated: snyk-open-source-report.html"
         continue-on-error: true
+
 
       # Step 7: Run Snyk Code Test and generate a report
       - name: Run Snyk Code Test
