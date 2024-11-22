@@ -61,7 +61,7 @@ jobs:
         
       # Step 7a: Run Snyk Code Test 
       - name: Run Snyk Code Test and generate 
-        run: snyk code test  --json > snyk-code-results.json
+        run: snyk code test  --json-file-output=snyk-code-results.json
         continue-on-error: true
     
       # Step 7b: Generate Snyk Code HTML Report 
@@ -84,14 +84,14 @@ jobs:
       # Step 10: Upload generated HTML reports
       - name: Upload Snyk Open Source Report
         if: always() # Ensure this runs even if the previous step fails
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snyk-open-source-report
           path: snyk-open-source-report.html
 
       - name: Upload Snyk Code Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snyk-code-report
           path: snyk-code-report.html
