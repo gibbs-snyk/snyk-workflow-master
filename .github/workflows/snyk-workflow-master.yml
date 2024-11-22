@@ -46,8 +46,9 @@ jobs:
 
       # Step 6a: Run Snyk Open Source Test
       - name: Run Snyk Test (all projects, severity high+)
-        run: snyk test --all-projects --severity-threshold=high --json > snyk-os-results.json
-    
+        run: snyk test --all-projects --severity-threshold=high --json-file-output=snyk-os-results.json
+        continue-on-error: true
+        
       # Step 6b: Run Snyk-Filter on Open Source test results
       - name: Run snyk-filter
         run: cat snyk-os-results.json | snyk-filter
@@ -56,7 +57,8 @@ jobs:
       # Step 6c: Generate Snyk Open Source HTML Report
       - name: Generate Snyk Open Source HTML Report
         run: snyk-to-html -i snyk-os-results.json -o snyk-open-source-report.html
-
+        continue-on-error: true
+        
       # Step 7a: Run Snyk Code Test 
       - name: Run Snyk Code Test and generate 
         run: snyk code test  --json > snyk-code-results.json
@@ -65,7 +67,8 @@ jobs:
       # Step 7b: Generate Snyk Code HTML Report 
       - name: Generate Snyk Code HTML Report
         run: snyk-to-html -i snyk-code-results.json -o snyk-code-report.html
-
+        continue-on-error: true
+        
       # Step 8: Build image and test using Snyk Container
       - name: Build image from dockerfile and run Snyk Container test
         run: |
